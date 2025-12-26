@@ -1,0 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+firestore-debug.log
+pubsub-debug.log
+
+# Dependency directories
+node_modules
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Build outputs (Do not push these!)
+dist
+dist-ssr
+*.local
+.firebase
+
+# IDE settings
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# SECURITY (CRITICAL)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

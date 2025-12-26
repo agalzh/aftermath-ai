@@ -1,0 +1,7 @@
+{
+  "name": "Aftermath AI",
+  "description": "A crowd-impact observation system for large events, allowing volunteers to submit observations and admins to monitor crowd pressure.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
