@@ -92,7 +92,7 @@ graph TD
 
 1. **Clone the Repo**
 ```bash
-git clone [https://github.com/your-username/aftermath-ai.git](https://github.com/your-username/aftermath-ai.git)
+git clone [https://github.com/agalzh/aftermath-ai.git](https://github.com/agalzh/aftermath-ai.git)
 cd aftermath-ai
 
 ```
@@ -160,3 +160,4 @@ This forces the LLM to ground its advice in physical reality, preventing halluci
 > Built for **InnovHack 2025** @ SASTRA University.
 
 ```
+
