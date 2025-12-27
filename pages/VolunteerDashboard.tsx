@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, addDoc, serverTimestamp, query, where, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db, auth, googleProvider } from '../firebase'; // Ensure auth/provider are imported
+import { db, auth, googleProvider } from '../firebase'; 
+
 import { CrowdLevel, Waypoint, Observation } from '../types';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { analyzeObservationClientSide } from '../utils/aiLogic';
@@ -9,8 +10,6 @@ import GlassSurface from '../components/GlassSurface';
 import BlurText from '../components/BlurText';
 
 const VolunteerDashboard: React.FC = () => {
-  // ✅ STATE
-  // We only need 'user'. 'email' comes from 'user.email'
   const [user, setUser] = useState<User | null>(null);
 
   const [assignedWaypoint, setAssignedWaypoint] = useState<Waypoint | null>(null);
@@ -19,13 +18,11 @@ const VolunteerDashboard: React.FC = () => {
   const [pendingObservation, setPendingObservation] = useState<Observation | null>(null);
   const [hasActiveObservation, setHasActiveObservation] = useState(false);
 
-  // Image & Timer State
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const OBS_WINDOW_MS = 10 * 60 * 1000;
   const [timerStart, setTimerStart] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(OBS_WINDOW_MS);
 
-  // 1. LISTEN TO AUTH STATE
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -33,7 +30,6 @@ const VolunteerDashboard: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // 2. HANDLE LOGIN / LOGOUT
   const handleGoogleLogin = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
@@ -48,7 +44,6 @@ const VolunteerDashboard: React.FC = () => {
     setAssignedWaypoint(null);
   };
 
-  // 3. FETCH ASSIGNMENT (Based on logged-in email)
   useEffect(() => {
     if (!db || !user?.email) {
       setAssignedWaypoint(null);
@@ -60,7 +55,6 @@ const VolunteerDashboard: React.FC = () => {
     const unsub = onSnapshot(q, (snapshot) => {
       const matched = snapshot.docs
         .map(doc => ({ id: doc.id, ...(doc.data() as Waypoint) }))
-        // Match the Waypoint's assignedEmails array to the current user's email
         .find(wp => wp.assignedEmails?.includes(user.email!));
 
       setAssignedWaypoint(matched || null);
@@ -69,7 +63,6 @@ const VolunteerDashboard: React.FC = () => {
     return () => unsub();
   }, [user]);
 
-  // 4. CHECK FOR PENDING INSTRUCTIONS (Admin replies)
   useEffect(() => {
     if (!db || !user?.email || !assignedWaypoint) {
       setPendingObservation(null);
@@ -79,7 +72,7 @@ const VolunteerDashboard: React.FC = () => {
     const q = query(
       collection(db, 'observations'),
       where('waypointId', '==', assignedWaypoint.id),
-      where('volunteerEmail', '==', user.email), // Use user.email here
+      where('volunteerEmail', '==', user.email),
       where('status', '==', 'PENDING')
     );
 
@@ -94,7 +87,6 @@ const VolunteerDashboard: React.FC = () => {
     return () => unsub();
   }, [assignedWaypoint, user]);
 
-  // 5. TIMER LOGIC
   useEffect(() => {
     if (!timerStart && (imageBase64 || message)) {
       setTimerStart(Date.now());
@@ -110,7 +102,6 @@ const VolunteerDashboard: React.FC = () => {
     return () => clearInterval(i);
   }, [timerStart]);
 
-  // 6. SUBMIT OBSERVATION
   const handleSubmitObservation = async () => {
     if (!user || !user.email) {
       alert('You must be logged in');
@@ -123,7 +114,7 @@ const VolunteerDashboard: React.FC = () => {
     }
 
     try {
-      // 1. Create the document (This part you already have, but we need the variable 'docRef')
+
       const docRef = await addDoc(collection(db, 'observations'), {
         imageBase64,
         waypointId: assignedWaypoint.id,
@@ -131,7 +122,8 @@ const VolunteerDashboard: React.FC = () => {
         crowdLevel,
         message,
         status: 'NEW',
-        aiStatus: 'PENDING', // Ensure this is set to PENDING
+        aiStatus: 'PENDING', 
+
         createdAt: serverTimestamp() || new Date(),
         expiresAt: new Date(Date.now() + 10 * 60 * 1000)
       });
@@ -157,7 +149,7 @@ const VolunteerDashboard: React.FC = () => {
     return (
       <div className="relative w-full h-screen bg-black overflow-auto flex flex-col items-center justify-center font-sans">
 
-        {/* BACKGROUND: DITHER */}
+        {}
         <div className="absolute inset-0 z-0">
           <Dither
             waveColor={[0.5, 0.5, 0.5]}
@@ -171,7 +163,7 @@ const VolunteerDashboard: React.FC = () => {
           />
         </div>
 
-        {/* GLASS LOGIN CARD */}
+        {}
         <div className="relative z-10 w-full max-w-sm px-4 pointer-events-none">
           <GlassSurface
             width="100%"
@@ -188,7 +180,7 @@ const VolunteerDashboard: React.FC = () => {
             className="p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
           >
             <div className="w-full">
-              {/* Header */}
+              {}
               <div className="text-center mb-5">
                 <BlurText
                   text="VOLUNTEER ACCESS"
@@ -200,13 +192,13 @@ const VolunteerDashboard: React.FC = () => {
                 </p>
               </div>
 
-              {/* Google Login Button */}
-              {/* Note: Added pointer-events-auto because the container is pointer-events-none */}
+              {}
+              {}
               <button
                 onClick={handleGoogleLogin}
                 className="group relative w-full flex items-center justify-center gap-3 py-4 px-4 border border-white/10 text-sm font-bold rounded-xl text-white bg-white/5 hover:bg-cyan-500/20 hover:border-cyan-500/50 transition-all duration-300 shadow-lg hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] pointer-events-auto"
               >
-                {/* Google Icon (Preserved Colors) */}
+                {}
                 <svg className="w-5 h-5 drop-shadow-md" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -236,17 +228,17 @@ const VolunteerDashboard: React.FC = () => {
   }
 
   if (user.email === "admin@aftermath.com") {
-    
+
     alert("Session already started, open a new instance in private window");
     window.location.href = "/";
-    return null; // Stop rendering the rest of the component
+    return null; 
+
   }
 
-  // --- RENDER: DASHBOARD ---
   return (
     <div className="relative w-full h-full bg-[#050505] text-zinc-200 font-sans selection:bg-white/20 overflow-y-auto overflow-x-hidden">
 
-      {/* 1. BACKGROUND: SUBTLE NOISE */}
+      {}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-20">
         <Dither
           waveColor={[0.6, 0.6, 0.6]}
@@ -258,8 +250,8 @@ const VolunteerDashboard: React.FC = () => {
         />
       </div>
 
-      {/* 2. MAIN CONTENT WRAPPER */}
-      {/* pt-28 pushes content below the static navbar. pb-40 ensures enough scroll space at bottom. */}
+      {}
+      {}
       <div className=''>
         <div className="relative z-10 md:w-2/4 w-md mx-auto pt-28 px-4 flex flex-col gap-6">
 
@@ -277,10 +269,10 @@ const VolunteerDashboard: React.FC = () => {
             mixBlendMode="normal"
             className="shadow-2xl border border-white/5"
           >
-            {/* INNER CONTENT PADDING */}
+            {}
             <div className="p-6 md:p-8 space-y-8 w-full">
 
-              {/* --- NEW TITLE SECTION --- */}
+              {}
               <div className="flex flex-col items-center justify-center border-b border-white/5 pb-6">
                 <BlurText
                   text="FIELD OPERATIONS"
@@ -289,7 +281,7 @@ const VolunteerDashboard: React.FC = () => {
                 />
               </div>
 
-              {/* --- HEADER: USER INFO --- */}
+              {}
               <div className="flex justify-between items-start">
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[15px] font-bold text-zinc-500 uppercase tracking-[0.2em]">
@@ -307,7 +299,7 @@ const VolunteerDashboard: React.FC = () => {
                 </button>
               </div>
 
-              {/* --- ASSIGNMENT DISPLAY --- */}
+              {}
               <div className={`transition-all duration-500 ${!assignedWaypoint ? 'opacity-50' : ''}`}>
                 <div className="flex justify-between items-center mb-3">
                   <h2 className="text-[15px] font-bold text-zinc-500 uppercase tracking-[0.2em]">
@@ -320,7 +312,7 @@ const VolunteerDashboard: React.FC = () => {
                     {assignedWaypoint ? assignedWaypoint.name : 'Standby for assignment...'}
                   </div>
 
-                  {/* Timer */}
+                  {}
                   {timerStart && (
                     <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center text-[10px] font-mono">
                       <span className="text-zinc-500 uppercase tracking-wider">Time Remaining</span>
@@ -332,7 +324,7 @@ const VolunteerDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* --- ADMIN INSTRUCTION --- */}
+              {}
               {pendingObservation && (
                 <div className="bg-orange-500/5 border border-orange-500/20 rounded-2xl p-5">
                   <p className="text-[9px] font-bold text-orange-500 uppercase tracking-[0.2em] mb-2">
@@ -353,13 +345,13 @@ const VolunteerDashboard: React.FC = () => {
                 </div>
               )}
 
-              {/* --- FORM SECTION --- */}
+              {}
               <div className={`space-y-6 ${!assignedWaypoint ? 'opacity-30 pointer-events-none grayscale' : ''}`}>
 
-                {/* Divider */}
+                {}
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                {/* 1. Photo Input */}
+                {}
                 <div className="space-y-3">
                   <label className="text-[15px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
                     Evidence
@@ -412,10 +404,10 @@ const VolunteerDashboard: React.FC = () => {
                   </label>
                 </div>
 
-                {/* 2. Controls Grid */}
+                {}
                 <div className="grid grid-cols-1 gap-6">
 
-                  {/* Density */}
+                  {}
                   <div className="space-y-3">
                     <label className="text-[15px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
                       Crowd Density
@@ -438,7 +430,7 @@ const VolunteerDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Notes */}
+                  {}
                   <div className="space-y-3">
                     <label className="text-[15px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
                       Field Notes
@@ -453,7 +445,7 @@ const VolunteerDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Submit Action */}
+                {}
                 <button
                   onClick={handleSubmitObservation}
                   disabled={!assignedWaypoint}

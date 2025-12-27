@@ -27,10 +27,10 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    // 1. MAIN CONTAINER: Full screen, black background
+
     <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col items-center justify-center font-sans">
 
-      {/* 2. DITHER BACKGROUND */}
+      {}
       <div className="absolute inset-0 z-0">
         <Dither
           waveColor={[0.5, 0.5, 0.5]}
@@ -44,14 +44,17 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         />
       </div>
 
-      {/* 3. GLASS CARD WRAPPER */}
+      {}
       <div className="relative z-10 w-full max-w-md px-4 pointer-events-none">
-        
-        {/* WE USE YOUR EXISTING GLASSSURFACE COMPONENT HERE */}
+
+        {}
         <GlassSurface
-          width="100%"         // Forces it to fill the container
-          height="auto"        // Forces it to grow with content
-          borderRadius={24}    // Matches rounded-2xl looks
+          width="100%"         
+
+          height="auto"        
+
+          borderRadius={24}    
+
           displace={15}
           distortionScale={-150}
           redOffset={5}
@@ -60,16 +63,16 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           brightness={60}
           opacity={0.8}
           mixBlendMode="screen"
-          // We add padding via className so the content isn't stuck to the glass edges
+
           className="p-8 sm:p-10" 
         >
 
-          {/* --- CONTENT INSIDE THE GLASS --- */}
-          <div className="w-full"> {/* Ensure content takes full width of glass */}
-            
-            {/* Header Section */}
+          {}
+          <div className="w-full"> {}
+
+            {}
             <div className="text-center mb-10">
-              {/* Title */}
+              {}
               <div className="mb-3 flex justify-center">
                 <BlurText
                   text="AfterMath AI"
@@ -80,20 +83,20 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 />
               </div>
 
-              {/* Subtitle */}
+              {}
               <p className="text-xs sm:text-sm text-zinc-300 font-semibold uppercase tracking-[0.2em] drop-shadow-md">
                 Crowd Observation System
               </p>
             </div>
 
-            {/* Error Message */}
+            {}
             {error && (
               <div className="flex items-center gap-2 p-4 mb-6 text-sm text-red-200 bg-red-500/20 border border-red-500/30 rounded-lg backdrop-blur-sm">
                 <span>{error}</span>
               </div>
             )}
 
-            {/* Button Section */}
+            {}
             <div className="space-y-6">
               <button
                 onClick={handleAnonymousLogin}
@@ -117,7 +120,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               </p>
             </div>
           </div>
-          
+
         </GlassSurface>
       </div>
     </div>

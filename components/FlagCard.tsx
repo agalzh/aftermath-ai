@@ -10,8 +10,8 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
 
     return (
         <div className="relative w-full mb-4 group">
-            
-            {/* 1. GLASS BACKGROUND */}
+
+            {}
             <div className="absolute inset-0 rounded-xl overflow-hidden z-0">
                 <GlassSurface
                     width="100%"
@@ -29,10 +29,10 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                 />
             </div>
 
-            {/* 2. CONTENT */}
+            {}
             <div className="relative z-10 p-4 text-white">
-                
-                {/* Header Info */}
+
+                {}
                 <div className="flex justify-between items-start mb-3">
                     <div>
                         <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                     )}
                 </div>
 
-                {/* Evidence Image */}
+                {}
                 {obs.imageBase64 && (
                     <div className="mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/20">
                         <img
@@ -71,16 +71,16 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                     </div>
                 )}
 
-                {/* Volunteer Message */}
+                {}
                 {obs.message && (
                     <div className="mb-3 bg-black/20 p-2.5 rounded-lg border border-white/5">
                         <p className="italic text-xs text-zinc-300 leading-relaxed">"{obs.message}"</p>
                     </div>
                 )}
 
-                {/* --- AI SECTIONS --- */}
-                
-                {/* 1. PROCESSING */}
+                {}
+
+                {}
                 {obs.aiStatus === "PROCESSING" && (
                     <div className="mb-3 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center gap-2 animate-pulse">
                         <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
@@ -88,14 +88,14 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                     </div>
                 )}
 
-                {/* 2. SUCCESS (Insight) */}
+                {}
                 {obs.aiStatus === 'DONE' && obs.aiInsight && (
                     <div className="mb-3 bg-indigo-950/30 border border-indigo-500/30 rounded-lg overflow-hidden">
                         <div className="px-3 py-2 border-b border-indigo-500/20 flex justify-between items-center bg-indigo-500/10">
                             <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider">✨ Gemini Insight</span>
                             <span className="text-[10px] font-bold text-white bg-indigo-600/50 px-1.5 rounded">{obs.aiInsight.risk}</span>
                         </div>
-                        
+
                         <div className="p-3">
                             <p className="text-xs text-indigo-100/80 mb-3 leading-snug">{obs.aiInsight.summary}</p>
                             <div className="space-y-1.5">
@@ -114,7 +114,7 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                     </div>
                 )}
 
-                {/* 3. FAILED (RESTORED HERE) */}
+                {}
                 {obs.aiStatus === 'FAILED' && (
                     <div className="mb-3 p-2 bg-red-900/20 border border-red-500/30 rounded-lg flex items-center justify-center gap-2 shadow-[inset_0_0_10px_rgba(220,38,38,0.2)]">
                         <span className="text-[10px] text-red-400 font-bold tracking-wide uppercase">
@@ -123,7 +123,7 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                     </div>
                 )}
 
-                {/* --- ACTION AREA --- */}
+                {}
                 {(obs.aiStatus === 'FAILED' || obs.aiStatus === 'DONE' || !obs.aiStatus) && (
                     <div className="space-y-2">
                         <textarea
@@ -134,7 +134,7 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                             onChange={(e) => setInstruction(e.target.value)}
                             disabled={obs.status === 'RESOLVED'}
                         />
-                        
+
                         <div className='flex gap-2'>
                             <button
                                 className="flex-1 bg-cyan-600/80 hover:bg-cyan-500 text-white border border-cyan-400/30 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all shadow-[0_0_10px_rgba(8,145,178,0.2)] disabled:opacity-30 disabled:shadow-none"
@@ -159,7 +159,7 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                             >
                                 Send Order
                             </button>
-                            
+
                             <button
                                 className="flex-1 bg-white/5 hover:bg-green-500/20 border border-white/10 hover:border-green-500/50 text-zinc-400 hover:text-green-300 py-2 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all disabled:opacity-20"
                                 disabled={obs.status !== 'ACKNOWLEDGED'} 
@@ -185,8 +185,8 @@ export default function FlagCard({ obs, urgent = false, user }: { obs: Observati
                         </div>
                     </div>
                 )}
-                
-                {/* Footer ID */}
+
+                {}
                 <div className="mt-3 pt-2 border-t border-white/5 flex justify-between">
                     <span className="text-[9px] text-zinc-300 font-mono">ID: {obs.id.slice(0,6)}</span>
                     <span className="text-[9px] text-zinc-400">{obs.status || 'NEW'}</span>

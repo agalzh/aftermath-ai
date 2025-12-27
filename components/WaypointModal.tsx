@@ -17,7 +17,6 @@ interface WaypointModalProps {
     assignedEmails: string[];
   }) => void;
 
-
   onDelete?: () => void;
 }
 
@@ -33,7 +32,6 @@ const WaypointModal: React.FC<WaypointModalProps> = ({
   const [type, setType] = useState<WaypointType>(WaypointType.POI);
   const [assignedEmailsInput, setAssignedEmailsInput] = useState('');
 
-  // Populate fields when editing
   useEffect(() => {
     if (initialData) {
       setName(initialData.name);
@@ -76,8 +74,8 @@ const WaypointModal: React.FC<WaypointModalProps> = ({
 
 return (
   <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    
-    {/* MODAL CONTAINER */}
+
+    {}
     <div className="w-full max-w-md">
       <GlassSurface
         width="100%"
@@ -94,8 +92,8 @@ return (
         className="shadow-2xl border border-white/5"
       >
         <div className="p-8 w-full">
-          
-          {/* --- HEADER --- */}
+
+          {}
           <div className="mb-2 border-b border-white/5 pb-2">
             <h2 className="text-xl font-bold text-white tracking-tight">
               {isEditMode ? 'Edit Waypoint' : 'Create Waypoint'}
@@ -105,10 +103,10 @@ return (
             </p>
           </div>
 
-          {/* --- FORM FIELDS --- */}
+          {}
           <div className="space-y-2">
-            
-            {/* Name Input */}
+
+            {}
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
                 Designation
@@ -122,7 +120,7 @@ return (
               />
             </div>
 
-            {/* Type Select */}
+            {}
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
                 Category
@@ -139,14 +137,14 @@ return (
                     </option>
                   ))}
                 </select>
-                {/* Custom Arrow */}
+                {}
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-600 group-hover:text-zinc-400 transition-colors">
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                 </div>
               </div>
             </div>
 
-            {/* Assigned Volunteers */}
+            {}
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-1">
                 Assignments
@@ -165,7 +163,7 @@ return (
 
           </div>
 
-          {/* --- ACTIONS --- */}
+          {}
           <div className="flex items-center justify-between mt-10 pt-6 border-t border-white/5">
             <div>
               {isEditMode && onDelete && (
@@ -202,3 +200,4 @@ return (
 };
 
 export default WaypointModal;
+

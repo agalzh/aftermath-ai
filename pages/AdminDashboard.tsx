@@ -10,17 +10,16 @@ import FlagCard from '../components/FlagCard';
 import { UserRole } from '../types';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../firebase';
-import { analyzeObservationClientSide } from '../utils/aiLogic'; // Adjust path if needed
+import { analyzeObservationClientSide } from '../utils/aiLogic'; 
+
 import GlassSurface from '../components/GlassSurface';
 import Dither from '../components/Dither';
 import BlurText from '../components/BlurText';
 
-
-// Replace the old MAP_STYLE string with this object
 const MAP_STYLE: any = {
     version: 8,
     sources: {
-        // 1. The Satellite Base
+
         'satellite-source': {
             type: 'raster',
             tiles: [
@@ -29,7 +28,7 @@ const MAP_STYLE: any = {
             tileSize: 256,
             attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
         },
-        // 2. The Labels Overlay (Roads, Cities, Places)
+
         'labels-source': {
             type: 'raster',
             tiles: [
@@ -52,12 +51,11 @@ const MAP_STYLE: any = {
             source: 'labels-source',
             minzoom: 0,
             maxzoom: 22
-            // No "paint" needed; these tiles are transparent PNGs with just text
+
         }
     ]
 };
 
-// Golden Gate Park approximate center
 const INITIAL_CENTER: [number, number] = [-122.483, 37.769];
 const INITIAL_ZOOM = 14;
 
@@ -76,35 +74,28 @@ const AdminDashboard: React.FC = () => {
 
     const [isMapLoaded, setIsMapLoaded] = useState(false);
 
-    // Interaction State
     const [isLinkingMode, setIsLinkingMode] = useState(false);
     const [linkStartId, setLinkStartId] = useState<string | null>(null);
 
-    // Drawing State
     const [isDrawingMode, setIsDrawingMode] = useState(false);
     const [drawPoints, setDrawPoints] = useState<[number, number][]>([]);
     const [savedBoundary, setSavedBoundary] = useState<GeoJSON.Feature<GeoJSON.Polygon> | null>(null);
 
-    // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingWaypointId, setEditingWaypointId] = useState<string | null>(null);
     const [tempCoordinates, setTempCoordinates] = useState<{ lat: number; lng: number } | null>(null);
 
     const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
-    // NEW: Store user location
     const [userPos, setUserPos] = useState<[number, number] | null>(null);
 
-    // Refs for event listener access
     const isDrawingModeRef = useRef(isDrawingMode);
     const isLinkingModeRef = useRef(isLinkingMode);
 
-    // 5. Sync Markers
     const markersRef = useRef<{ [key: string]: maplibregl.Marker }>({});
 
     const handleMarkerClickRef = useRef<(id: string) => void>(() => { });
 
-    // NEW: Function to get location and fly there
     const handleLocateMe = () => {
         if (!navigator.geolocation) {
             alert("Geolocation is not supported by your browser");
@@ -121,7 +112,8 @@ const AdminDashboard: React.FC = () => {
                 if (mapInstance.current) {
                     mapInstance.current.flyTo({
                         center: coords,
-                        zoom: 18 // Close zoom for satellite view
+                        zoom: 18 
+
                     });
                 }
             },
@@ -148,9 +140,8 @@ const AdminDashboard: React.FC = () => {
         };
     }, [isLinkingMode, linkStartId, isDrawingMode]);
 
-    // NEW: Automatically locate on load (Optional)
     useEffect(() => {
-        // Only try once when map first loads
+
         if (isMapLoaded) {
             handleLocateMe();
         }
@@ -204,7 +195,6 @@ const AdminDashboard: React.FC = () => {
         return () => unsub();
     }, []);
 
-    // 1. Initialize Map
     useEffect(() => {
         if (!mapContainer.current || mapInstance.current) return;
 
@@ -221,14 +211,12 @@ const AdminDashboard: React.FC = () => {
             setIsMapLoaded(true);
             setTimeout(() => map.resize(), 0);
 
-            // --- Boundary Layers ---
             if (!map.getSource('boundary')) {
                 map.addSource('boundary', {
                     type: 'geojson',
                     data: { type: 'FeatureCollection', features: [] }
                 });
 
-                // Draft line (while drawing)
                 map.addLayer({
                     id: 'boundary-draft',
                     type: 'line',
@@ -241,7 +229,6 @@ const AdminDashboard: React.FC = () => {
                     filter: ['!=', ['geometry-type'], 'Polygon']
                 });
 
-                // Filled area (saved)
                 map.addLayer({
                     id: 'boundary-fill',
                     type: 'fill',
@@ -253,7 +240,6 @@ const AdminDashboard: React.FC = () => {
                     filter: ['==', ['geometry-type'], 'Polygon']
                 });
 
-                // Outline (saved)
                 map.addLayer({
                     id: 'boundary-outline',
                     type: 'line',
@@ -266,14 +252,12 @@ const AdminDashboard: React.FC = () => {
                 });
             }
 
-            // --- Connection Layers ---
             if (!map.getSource('connections')) {
                 map.addSource('connections', {
                     type: 'geojson',
                     data: { type: 'FeatureCollection', features: [] }
                 });
 
-                // Static connection lines
                 map.addLayer({
                     id: 'connections-line',
                     type: 'line',
@@ -283,9 +267,11 @@ const AdminDashboard: React.FC = () => {
                         'line-cap': 'round'
                     },
                     paint: {
-                        'line-color': '#2563eb', // Slate-600
+                        'line-color': '#2563eb', 
+
                         'line-width': 3,
-                        'line-dasharray': [2, 2] // Dashed static line
+                        'line-dasharray': [2, 2] 
+
                     }
                 });
                 map.addLayer({
@@ -293,25 +279,30 @@ const AdminDashboard: React.FC = () => {
                     type: 'symbol',
                     source: 'connections',
                     layout: {
-                        'symbol-placement': 'line',      // This makes the text follow the line path
-                        'text-field': '▶',               // The arrow character (you can use '>' if you prefer)
-                        'text-size': 20,                 // Size of the arrow
-                        'symbol-spacing': 50,            // How far apart the arrows are
-                        'text-keep-upright': false,      // CRITICAL: Rotates the arrow to match the line direction
-                        'text-allow-overlap': true       // Ensures arrows show even if space is tight
+                        'symbol-placement': 'line',      
+
+                        'text-field': '▶',               
+
+                        'text-size': 20,                 
+
+                        'symbol-spacing': 50,            
+
+                        'text-keep-upright': false,      
+
+                        'text-allow-overlap': true       
+
                     },
                     paint: {
-                        'text-color': '#2563eb',         // Same color as your line (blue)
-                        'text-halo-color': '#ffffff',    // White outline so it stands out
+                        'text-color': '#2563eb',         
+
+                        'text-halo-color': '#ffffff',    
+
                         'text-halo-width': 2
                     }
                 });
             }
         });
 
-        // --- Map Click Handlers ---
-
-        // Right-click: Create Waypoint (only if not drawing)
         map.on('contextmenu', (e) => {
             if (isDrawingModeRef.current || isLinkingModeRef.current) return;
             const { lat, lng } = e.lngLat;
@@ -320,9 +311,8 @@ const AdminDashboard: React.FC = () => {
             setIsModalOpen(true);
         });
 
-        // Left-click: Handle Drawing
         map.on('click', (e) => {
-            // If we are in drawing mode, add points
+
             if (isDrawingModeRef.current) {
                 const { lng, lat } = e.lngLat;
                 setDrawPoints(prev => [...prev, [lng, lat]]);
@@ -341,11 +331,9 @@ const AdminDashboard: React.FC = () => {
         isLinkingModeRef.current = isLinkingMode;
     }, [isDrawingMode, isLinkingMode]);
 
-    // 2. Fetch Waypoints & Settings
     useEffect(() => {
         if (!db) return;
 
-        // Fetch Waypoints
         const unsubWaypoints = onSnapshot(collection(db, 'waypoints'), (snapshot) => {
             const querySnapshot = snapshot as unknown as QuerySnapshot<DocumentData>;
             const loadedWaypoints: Waypoint[] = querySnapshot.docs.map(doc => {
@@ -361,7 +349,6 @@ const AdminDashboard: React.FC = () => {
                 } as Waypoint;
             });
 
-            // SORT BY CREATION TIME (Stable Numbering)
             loadedWaypoints.sort((a, b) => {
                 const tA = a.createdAt?.toMillis ? a.createdAt.toMillis() : (Date.now());
                 const tB = b.createdAt?.toMillis ? b.createdAt.toMillis() : (Date.now());
@@ -371,7 +358,6 @@ const AdminDashboard: React.FC = () => {
             setWaypoints(loadedWaypoints);
         });
 
-        // Fetch Event Config (Boundary)
         const unsubSettings = onSnapshot(doc(db, 'settings', 'event_config'), (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data() as { boundaryJson?: string };
@@ -392,7 +378,6 @@ const AdminDashboard: React.FC = () => {
         };
     }, []);
 
-    // 3. Update Boundary Source (Live Drawing vs Saved)
     useEffect(() => {
         if (!isMapLoaded || !mapInstance.current) return;
         const map = mapInstance.current;
@@ -402,7 +387,7 @@ const AdminDashboard: React.FC = () => {
         let data: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
 
         if (isDrawingMode && drawPoints.length > 0) {
-            // Render line while drawing, polygon if > 2 points
+
             if (drawPoints.length === 1) {
                 data.features.push({
                     type: 'Feature',
@@ -421,7 +406,8 @@ const AdminDashboard: React.FC = () => {
                     properties: {},
                     geometry: {
                         type: 'Polygon',
-                        coordinates: [[...drawPoints, drawPoints[0]]] // Close the loop visually
+                        coordinates: [[...drawPoints, drawPoints[0]]] 
+
                     }
                 });
             }
@@ -433,7 +419,6 @@ const AdminDashboard: React.FC = () => {
 
     }, [isDrawingMode, drawPoints, savedBoundary, isMapLoaded]);
 
-    // 4. Update Connection Lines
     useEffect(() => {
         if (!isMapLoaded || !mapInstance.current) return;
         const map = mapInstance.current;
@@ -475,7 +460,6 @@ const AdminDashboard: React.FC = () => {
         if (!isMapLoaded || !mapInstance.current) return;
         const map = mapInstance.current;
 
-        // Cleanup removed markers
         Object.keys(markersRef.current).forEach(id => {
             if (!waypoints.find(w => w.id === id)) {
                 markersRef.current[id].remove();
@@ -483,7 +467,6 @@ const AdminDashboard: React.FC = () => {
             }
         });
 
-        // Add/Update markers
         waypoints.forEach((waypoint) => {
             let markerEl = markersRef.current[waypoint.id]?.getElement();
 
@@ -501,7 +484,6 @@ const AdminDashboard: React.FC = () => {
                 markersRef.current[waypoint.id].setLngLat([waypoint.coordinates.lng, waypoint.coordinates.lat]);
             }
 
-            // Update Styles
             updateMarkerVisuals(markerEl, waypoint);
         });
 
@@ -510,42 +492,31 @@ const AdminDashboard: React.FC = () => {
     useEffect(() => {
         if (!isMapLoaded || !mapInstance.current) return;
 
-        // Force MapLibre to re-project markers after any marker-affecting change
         mapInstance.current.resize();
     }, [isMapLoaded, waypoints, linkStartId, isLinkingMode]);
 
     const processedIdsRef = useRef<Set<string>>(new Set());
 
-    // 2. The Trigger Effect
     useEffect(() => {
         if (observations.length === 0) return;
 
         observations.forEach(obs => {
-            // STOP if Resolved
+
             if (obs.status === 'RESOLVED') return;
 
-            // STOP if we already tried this ID in this session (Prevents Loop)
             if (processedIdsRef.current.has(obs.id)) return;
 
-            // STOP if AI is already working, done, or failed previously
-            // (We do NOT retry FAILED automatically to avoid infinite API bills)
             if (obs.aiStatus === 'DONE' || obs.aiStatus === 'PROCESSING' || obs.aiStatus === 'FAILED') {
                 return;
             }
 
-            // If we get here, it's a fresh observation. Run AI.
             console.log("🤖 Auto-triggering AI for:", obs.id);
 
-            // Mark as processed immediately
             processedIdsRef.current.add(obs.id);
 
             analyzeObservationClientSide(obs.id);
         });
     }, [observations]);
-
-    // ---------------------------------------------------------------------------
-    // END AI TRIGGER LOGIC
-    // ---------------------------------------------------------------------------
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -566,14 +537,13 @@ const AdminDashboard: React.FC = () => {
         const el = document.createElement('div');
 
         el.className = 'marker-root cursor-pointer shadow-md rounded-full border-2 border-white box-border group';
-        // NEW: Create the Nametag Label
+
         const label = document.createElement('span');
-        // Style: Centered above dot, dark background, white text (Minecraft style)
+
         label.className = 'absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-1.5 py-0.5 bg-black/50 text-white text-[13px] font-bold rounded whitespace-nowrap pointer-events-none backdrop-blur-sm';
 
         el.appendChild(label);
 
-        // Event listener
         el.addEventListener('click', (e) => {
             e.stopPropagation();
             handleMarkerClick(waypoint.id);
@@ -584,20 +554,16 @@ const AdminDashboard: React.FC = () => {
     const handleMarkerClick = (id: string) => handleMarkerClickRef.current(id);
 
     const updateMarkerVisuals = (el: HTMLElement, waypoint: Waypoint) => {
-        // color only
+
         el.style.backgroundColor = getWaypointColor(waypoint.type);
 
-        // fixed size
         el.style.width = '16px';
         el.style.height = '16px';
 
-        // fixed stacking
         el.style.zIndex = '10';
 
-        // IMPORTANT: NEVER touch transform
         el.style.transform = '';
 
-        // NEW: Set the label text instead of clearing innerText
         const label = el.querySelector('span');
         if (label) {
             label.innerText = waypoint.name;
@@ -606,16 +572,20 @@ const AdminDashboard: React.FC = () => {
 
     const getWaypointColor = (type: WaypointType) => {
         switch (type) {
-            case WaypointType.ENTRY: return '#22c55e'; // Green
-            case WaypointType.EXIT: return '#ef4444'; // Red
-            case WaypointType.POI: return '#3b82f6'; // Blue
-            case WaypointType.MEDICAL: return '#dc2626'; // Dark Red
-            case WaypointType.JUNCTION: return '#eab308'; // Yellow
-            default: return '#6b7280'; // Gray
+            case WaypointType.ENTRY: return '#22c55e'; 
+
+            case WaypointType.EXIT: return '#ef4444'; 
+
+            case WaypointType.POI: return '#3b82f6'; 
+
+            case WaypointType.MEDICAL: return '#dc2626'; 
+
+            case WaypointType.JUNCTION: return '#eab308'; 
+
+            default: return '#6b7280'; 
+
         }
     };
-
-    // --- Logic Functions ---
 
     const toggleConnection = async (fromId: string, toId: string) => {
         if (!db) return;
@@ -681,7 +651,8 @@ const AdminDashboard: React.FC = () => {
     const handleStartDrawing = () => {
         setIsDrawingMode(true);
         setDrawPoints([]);
-        setSavedBoundary(null); // Temporarily hide saved to show new draft
+        setSavedBoundary(null); 
+
     };
 
     const handleSaveBoundary = async () => {
@@ -691,7 +662,6 @@ const AdminDashboard: React.FC = () => {
             return;
         }
 
-        // Close loop for GeoJSON
         const closedCoords = [...drawPoints, drawPoints[0]];
         const newBoundary: GeoJSON.Feature<GeoJSON.Polygon> = {
             type: "Feature",
@@ -703,7 +673,7 @@ const AdminDashboard: React.FC = () => {
         };
 
         try {
-            // FIX: Serialize to string to avoid Firestore nested array error
+
             await setDoc(doc(db, 'settings', 'event_config'), {
                 boundaryJson: JSON.stringify(newBoundary)
             });
@@ -723,7 +693,7 @@ const AdminDashboard: React.FC = () => {
     };
 
     const editingWaypoint = waypoints.find(w => w.id === editingWaypointId);
-    // PRIORITY SPLIT (ADD THIS ABOVE return)
+
     const active = observations.filter(o => o.status !== 'RESOLVED');
 
     const highPriority = active.filter(
@@ -740,7 +710,7 @@ const AdminDashboard: React.FC = () => {
         return (
             <div className="relative w-full h-screen bg-black overflow-hidden flex flex-col items-center justify-center font-sans">
 
-                {/* BACKGROUND: DITHER */}
+                {}
                 <div className="absolute inset-0 z-0">
                     <Dither
                         waveColor={[0.5, 0.5, 0.5]}
@@ -754,7 +724,7 @@ const AdminDashboard: React.FC = () => {
                     />
                 </div>
 
-                {/* GLASS LOGIN CARD */}
+                {}
                 <div className="relative z-10 w-full max-w-sm px-4 pointer-events-none">
                     <GlassSurface
                         width="100%"
@@ -771,7 +741,7 @@ const AdminDashboard: React.FC = () => {
                         className="p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
                     >
                         <div className="w-full">
-                            {/* Header */}
+                            {}
                             <div className="text-center mb-8">
                                 <BlurText
                                     text="ADMIN CENTER"
@@ -783,7 +753,7 @@ const AdminDashboard: React.FC = () => {
                                 </p>
                             </div>
 
-                            {/* Error Display */}
+                            {}
                             {error && (
                                 <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center gap-3 backdrop-blur-md">
                                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
@@ -791,7 +761,7 @@ const AdminDashboard: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Form */}
+                            {}
                             <form onSubmit={handleLogin} className="space-y-5">
                                 <div className="space-y-1.5">
                                     <label className="block text-[9px] font-bold text-cyan-200/70 uppercase tracking-widest pl-1">
@@ -849,18 +819,18 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="relative h-full grid grid-cols-12 gap-4">
 
-                {/* MAP PANEL */}
+                {}
                 <div className="col-span-8 relative rounded-lg border border-gray-300 overflow-hidden shadow-sm bg-gray-100">
                     <div ref={mapContainer} className="absolute inset-0" />
 
-                    {/* Controls Overlay */}
+                    {}
                     <div className="absolute top-4 left-4 bg-zinc-900/95 backdrop-blur-sm p-4 rounded-2xl shadow-2xl border border-white/10 z-10 flex flex-col gap-3 min-w-52">
-                        {/* Header */}
+                        {}
                         <div className="flex items-center justify-between mb-1">
                             <h3 className="font-bold text-white text-sm tracking-wide">Map Tools</h3>
                         </div>
 
-                        {/* Locate Me Button */}
+                        {}
                         <button
                             onClick={handleLocateMe}
                             className="group w-full py-2.5 px-3 bg-zinc-800 hover:bg-zinc-700 active:scale-95 transition-all rounded-xl text-zinc-100 text-xs font-semibold flex items-center gap-3"
@@ -869,7 +839,7 @@ const AdminDashboard: React.FC = () => {
                             Locate Me
                         </button>
 
-                        {/* Drawing Tools Section */}
+                        {}
                         {isDrawingMode ? (
                             <div className="flex flex-col gap-3 p-3 bg-zinc-800/50 rounded-xl border border-white/5 animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="flex flex-col">
@@ -905,7 +875,7 @@ const AdminDashboard: React.FC = () => {
                             </button>
                         )}
 
-                        {/* Linking Tools */}
+                        {}
                         <button
                             onClick={() => {
                                 if (isDrawingMode) return;
@@ -924,7 +894,7 @@ const AdminDashboard: React.FC = () => {
                             {isLinkingMode ? 'Finish Linking' : 'Link Waypoints'}
                         </button>
 
-                        {/* Helper Footer */}
+                        {}
                         <div className="pt-2 mt-1 border-t border-white/5">
                             {!isDrawingMode && !isLinkingMode && (
                                 <div className="text-[10px] text-zinc-500 space-y-1 font-medium">
@@ -940,7 +910,7 @@ const AdminDashboard: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Legend */}
+                    {}
                     <div className="absolute bottom-4 right-4 bg-zinc-900/95 backdrop-blur-sm p-3 rounded-2xl shadow-2xl border border-white/10 z-10 w-40">
                         <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
                             <h3 className="font-bold text-white text-sm tracking-wide">Legend</h3>
@@ -967,8 +937,8 @@ const AdminDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* AI PANEL */}
-                {/* STATUS / ACTION PANEL */}
+                {}
+                {}
                 <div className="col-span-4 rounded-2xl border border-white/5 bg-zinc-950/20 shadow-none flex flex-col overflow-hidden">
                     <GlassSurface
                         width="100%"
@@ -977,24 +947,24 @@ const AdminDashboard: React.FC = () => {
                         opacity={0.3}
                         className="flex flex-col overflow-hidden "
                     >
-                        {/* Inner Layout Wrapper */}
+                        {}
                         <div className="flex flex-col w-full h-full">
 
-                            {/* 1. HEADER: Status + Logout */}
+                            {}
                             <div className="p-6 flex-none border-b border-white/5 bg-white/[0.02] flex justify-between items-start">
 
-                                {/* Left: Status Indicator */}
+                                {}
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         <BlurText
                                             text={flaggedObservations.length > 0 ? "Critical Alert" : "System Nominal"}
                                             className={`text-sm font-medium tracking-wide ${flaggedObservations.length > 0
                                                 ? "text-red-400"
-                                                : "text-emerald-400" /* Keeping the green as requested */
+                                                : "text-emerald-400" 
                                                 }`}
                                             delay={50}
                                         />
-                                        {/* Status Dot */}
+                                        {}
                                         <div className={`w-1.5 h-1.5 rounded-full ${flaggedObservations.length > 0
                                             ? 'bg-red-500 animate-pulse'
                                             : 'bg-emerald-500'
@@ -1009,8 +979,8 @@ const AdminDashboard: React.FC = () => {
                                     </p>
                                 </div>
 
-                                {/* Right: Logout Button */}
-                                {/* Adapted to Minimalist Dark Theme (Removed bg-white to fit glass UI) */}
+                                {}
+                                {}
                                 <button
                                     onClick={handleLogout}
                                     className="px-3 py-1 rounded border border-red-500/20 text-red-400 text-[10px] font-medium tracking-wider hover:bg-red-500/10 transition-colors uppercase"
@@ -1020,24 +990,24 @@ const AdminDashboard: React.FC = () => {
 
                             </div>
 
-                            {/* 2. OBSERVATION LIST */}
+                            {}
                             <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar relative">
 
-                                {/* High Priority Items */}
+                                {}
                                 {highPriority.map(obs => (
                                     <div key={obs.id} className="transition-opacity duration-200 hover:opacity-80">
                                         <FlagCard obs={obs} urgent user={user} />
                                     </div>
                                 ))}
 
-                                {/* Low Priority Items */}
+                                {}
                                 {highPriority.length === 0 && lowPriority.map(obs => (
                                     <div key={obs.id} className="transition-opacity duration-200 hover:opacity-80">
                                         <FlagCard obs={obs} user={user} />
                                     </div>
                                 ))}
 
-                                {/* Empty State */}
+                                {}
                                 {observations.length === 0 && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-700 pointer-events-none">
                                         <span className="text-xs font-medium uppercase tracking-widest opacity-40">No Flags so far...</span>
@@ -1045,7 +1015,7 @@ const AdminDashboard: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* 3. ACTIVITY LOGS */}
+                            {}
                             <div className="h-48 flex-none bg-zinc-900/20 border-t border-white/5 flex flex-col backdrop-blur-md">
                                 <div className="px-6 py-3 border-b border-white/5">
                                     <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">Activity Feed</span>
@@ -1057,7 +1027,7 @@ const AdminDashboard: React.FC = () => {
                                             key={log.id}
                                             className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition-colors shadow-sm"
                                         >
-                                            {/* Header: Action + Time */}
+                                            {}
                                             <div className="flex justify-between items-baseline mb-1">
                                                 <span className="text-xs font-semibold text-zinc-200">
                                                     {log.action}
@@ -1067,7 +1037,7 @@ const AdminDashboard: React.FC = () => {
                                                 </span>
                                             </div>
 
-                                            {/* Body: Message */}
+                                            {}
                                             {log.message && (
                                                 <p className="text-xs text-zinc-400 leading-snug">
                                                     {log.message}

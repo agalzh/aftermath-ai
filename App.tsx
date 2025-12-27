@@ -3,11 +3,9 @@ import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import { UserRole } from './types';
 
-// Components
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 
-// Pages
 import Login from './pages/Login'; 
 import RoleSelection from './pages/RoleSelection';
 import AdminDashboard from './pages/AdminDashboard';
@@ -21,18 +19,18 @@ const App: React.FC = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      
-      // FIX: If user logs out (currentUser is null), reset the Role Selection
+
       if (!currentUser) {
         setCurrentView(UserRole.UNKNOWN);
       }
-      
+
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
-  const handleRoleSelection = (roleIdentifier: UserRole) => { // Type safe
+  const handleRoleSelection = (roleIdentifier: UserRole) => { 
+
     setCurrentView(roleIdentifier);
   };
 
@@ -40,7 +38,6 @@ const App: React.FC = () => {
     return <LoadingSpinner />;
   }
 
-  // 1. LANDING: If not authenticated at all (not even anonymous), show Login
   if (!user) {
     return (
         <Layout>
@@ -49,7 +46,6 @@ const App: React.FC = () => {
     ); 
   }
 
-  // 2. ROLE SELECT: If authenticated (Anonymous) but no role picked
   if (currentView === UserRole.UNKNOWN) {
     return (
       <Layout>
@@ -58,7 +54,6 @@ const App: React.FC = () => {
     );
   }
 
-  // 3. DASHBOARDS
   return (
     <Layout userRole={currentView}>
       {currentView === UserRole.ADMIN ? (

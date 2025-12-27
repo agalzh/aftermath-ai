@@ -17,7 +17,6 @@ html, body, #root {
   height: 100%;
   margin: 0;
 }
-@import "tailwindcss";
 
 @theme {
   /* 1. Register the animation utilities */
